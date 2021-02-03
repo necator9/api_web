@@ -1,0 +1,6 @@
+.idea/
+__pycache__/
+migrations/__pycache__/
+migrations/versions/__pycache__/
+web_api_sl/__pycache__/
+
