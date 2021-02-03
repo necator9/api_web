@@ -1,4 +1,5 @@
 from web_api_sl import db
+from sqlalchemy import inspect
 
 
 class Node(db.Model):
@@ -10,3 +11,6 @@ class Node(db.Model):
 
     def __repr__(self):
         return 'Node: {}, app status: {}'.format(self.name, self.app_status)
+
+    def object_as_dict(self):
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}

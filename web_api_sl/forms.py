@@ -4,9 +4,10 @@ from wtforms import StringField, SubmitField, FloatField
 from wtforms.validators import DataRequired
 
 
-class NodeParams(FlaskForm):
-    name = StringField('Username', validators=[DataRequired()])
-    app_status = StringField('App status')
+class ActionButton(FlaskForm):
+    submit = SubmitField('Submit')
+
+class SetNodeParams(FlaskForm):
     latitude = FloatField('Latitude')
     submit = SubmitField('Submit')
 

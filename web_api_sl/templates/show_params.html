@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+
+<h1>Node parameters</h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            {{ wtf.quick_form(update_form) }}
+        </div>
+    </div>
+    {% if node %}
+            <button type="button" onclick="window.location.href='{{ url_for('routes.set', node_name=node['name']) }}';">Forwadrd</button>
+        <table style="width:50%">
+            {% for key, value in node.object_as_dict().items() %}
+                <tr>
+                <th>{{ key }}:</th>
+                <td>{{ value }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+{% endblock %}

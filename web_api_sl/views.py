@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, g, flash, request
-from web_api_sl.forms import NodeParams, SearchForm, UpdateData
+from web_api_sl.forms import SetNodeParams, SearchForm, UpdateData, ActionButton
 from web_api_sl.models import Node
+from web_api_sl import db
 
 bp = Blueprint('routes', __name__)
 
@@ -21,25 +22,89 @@ def search():
     if not g.search_form.validate():
         return redirect(url_for('routes.index'))
 
-    req_hostname = g.search_form.q.data
-    node = Node.query.filter_by(name=req_hostname).first()
-    params_form = NodeParams()
-    get_form = UpdateData()
-    if get_form.validate_on_submit():
-        flash('Updating')
-        params_form.name.data = node.name
-        params_form.app_status.data = node.app_status
-        params_form.latitude.data = node.latitude
+    return redirect(url_for('routes.get', node_name=g.search_form.q.data))
 
-    if params_form.validate_on_submit():
-        flash('Data submitted')
-        # return redirect(url_for('main.edit_profile'))
-    elif request.method == 'GET' and node:
-        params_form.name.data = node.name
-        params_form.app_status.data = node.app_status
-        params_form.latitude.data = node.latitude
-    elif not node:
-        flash('No previous records for node {}'.format(req_hostname))
 
-    return render_template('node_stats.html', hostname=req_hostname, node=node, form=params_form, get_form=get_form)
+def api_request(node_name):
+    return False, {'name': node_name, 'app_status': True, 'latitude': 1022}
 
+
+def send_api_request(key, value):
+    import time
+    time.sleep(5)
+    return False
+
+
+def process_api_request(new_node, old_node):
+    new_node_d = new_node.object_as_dict()
+    old_node_d = old_node.object_as_dict()
+    submitted_fields = list()
+
+    for key in new_node_d:
+        if new_node_d[key] != old_node_d[key] and new_node_d[key] is not None:
+            err = send_api_request(key, new_node_d[key])
+            if err:
+                flash('Error when submitting data')
+            else:
+                submitted_fields.append(key)
+                setattr(old_node, key, getattr(new_node, key))
+                db.session.add(old_node)
+                db.session.commit()
+
+    flash('Submitted keys: {}'.format(submitted_fields))
+
+
+@bp.route('/get/<node_name>', methods=['GET', 'POST'])
+def get(node_name):
+    node = Node.query.filter_by(name=node_name).first()
+    if not node:
+        flash('No previous records for node {}'.format(node_name))
+
+    update_form = UpdateData()
+    if update_form.validate_on_submit():
+        err, params = api_request(node_name)
+        if err:
+            flash('Error while fetching data')
+            return render_template('show_params.html', node=node, update_form=update_form)
+
+        if not node:
+            node = Node(**params)
+            db.session.add(node)
+            db.session.commit()
+
+        elif node:
+            for key, value in params.items():
+                setattr(node, key, value)
+            db.session.add(node)
+            db.session.commit()
+
+    return render_template('show_params.html', node=node, update_form=update_form)
+
+
+@bp.route('/set/<node_name>', methods=['GET', 'POST'])
+def set(node_name):
+    node = Node.query.filter_by(name=node_name).first()
+    if not node:
+        flash('No previous records for node {}'.format(node_name))
+        return redirect(url_for('routes.get', node_name=node_name))
+
+    node_form = SetNodeParams(obj=node)
+
+    if node_form.validate_on_submit():
+        new_node = Node()
+        node_form.populate_obj(new_node)
+        process_api_request(new_node, node)
+
+    action_form = ActionButton()
+    print(action_form.submit.label)
+    action_form.submit.label.text = 'olo'
+    print(action_form.submit.label)
+
+    return render_template('set_params.html', node=node, node_form=node_form, )
+
+
+@bp.route("/forward/", methods=['POST'])
+def move_forward():
+    #Moving forward code
+    forward_message = "Moving Forward..."
+    return redirect(url_for('routes.set', node_name='test'))
