@@ -4,8 +4,8 @@ from wtforms import StringField, SubmitField, FloatField
 from wtforms.validators import DataRequired
 
 
-class ActionButton(FlaskForm):
-    submit = SubmitField('Submit')
+button_types = {'lamp_on': 'Lamp on', 'lamp_off': 'Lamp off', 'restart': 'Restart app'}
+
 
 class SetNodeParams(FlaskForm):
     latitude = FloatField('Latitude')

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, g, flash, request
-from web_api_sl.forms import SetNodeParams, SearchForm, UpdateData, ActionButton
+from web_api_sl.forms import SetNodeParams, SearchForm, UpdateData, button_types
 from web_api_sl.models import Node
 from web_api_sl import db
 
@@ -95,16 +95,10 @@ def set(node_name):
         node_form.populate_obj(new_node)
         process_api_request(new_node, node)
 
-    action_form = ActionButton()
-    print(action_form.submit.label)
-    action_form.submit.label.text = 'olo'
-    print(action_form.submit.label)
+    if request.method == 'POST':
+        print(request.form)
+        for alias, button in button_types.items():
+            if alias in request.form:
+                flash(button)
 
-    return render_template('set_params.html', node=node, node_form=node_form, )
-
-
-@bp.route("/forward/", methods=['POST'])
-def move_forward():
-    #Moving forward code
-    forward_message = "Moving Forward..."
-    return redirect(url_for('routes.set', node_name='test'))
+    return render_template('set_params.html', node=node, node_form=node_form, buttons=button_types, node_name=node_name)
