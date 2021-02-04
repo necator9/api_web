@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, g, flash, reque
 from web_api_sl.forms import SetNodeParams, SearchForm, UpdateData, button_types
 from web_api_sl.models import Node
 from web_api_sl import db
+from datetime import datetime
 
 bp = Blueprint('routes', __name__)
 
@@ -39,6 +40,7 @@ def process_api_request(new_node, old_node):
     new_node_d = new_node.object_as_dict()
     old_node_d = old_node.object_as_dict()
     submitted_fields = list()
+    db_modified = False
 
     for key in new_node_d:
         if new_node_d[key] != old_node_d[key] and new_node_d[key] is not None:
@@ -48,8 +50,12 @@ def process_api_request(new_node, old_node):
             else:
                 submitted_fields.append(key)
                 setattr(old_node, key, getattr(new_node, key))
-                db.session.add(old_node)
-                db.session.commit()
+                db_modified = True
+
+    if db_modified:
+        old_node.timestamp = datetime.utcnow()
+        db.session.add(old_node)
+        db.session.commit()
 
     flash('Submitted keys: {}'.format(submitted_fields))
 
@@ -96,7 +102,6 @@ def set(node_name):
         process_api_request(new_node, node)
 
     if request.method == 'POST':
-        print(request.form)
         for alias, button in button_types.items():
             if alias in request.form:
                 flash(button)

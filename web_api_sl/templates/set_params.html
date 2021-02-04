@@ -4,14 +4,16 @@
 {% block app_content %}
 
 <h1>Node parameters</h1>
-    <form method="post" action="/set/{{ node_name }}">
-        {% for alias, button in buttons.items() %}
-            <input type="submit" value="{{ button }}" name="{{ alias }}"/>
-        {% endfor %}
-    </form>
-
-    <div class="row">
-        <div class="col-md-4">{{ wtf.quick_form(node_form) }}</div>
-    </div>
+<p><a href="{{ url_for('routes.get', node_name=node_name) }}"><-Show parameters</a></p>
+<p>
+<form method="post" action="/set/{{ node_name }}">
+    {% for alias, button in buttons.items() %}
+        <input type="submit" value="{{ button }}" name="{{ alias }}"/>
+    {% endfor %}
+</form>
+</p>
+<div class="row">
+    <div class="col-md-4">{{ wtf.quick_form(node_form) }}</div>
+</div>
 
 {% endblock %}
