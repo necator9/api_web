@@ -12,21 +12,24 @@ moment = Moment()
 
 def create_app(config):
     app = Flask(__name__)
-    app.config.from_object(config)
+    with app.app_context():
+        app.config.from_object(config)
 
-    db.init_app(app)
-    migrate.init_app(app, db)
-    bootstrap.init_app(app)
-    moment.init_app(app)
+        db.init_app(app)
+        migrate.init_app(app, db)
+        bootstrap.init_app(app)
+        moment.init_app(app)
 
-    register_blueprints(app)
+        register_blueprints(app)
 
     return app
 
 
 def register_blueprints(app):
-    import web_api_sl.views as views
-    app.register_blueprint(views.bp)
+    from web_api_sl.views import bp as views_bp
+    app.register_blueprint(views_bp)
+    from web_api_sl.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
 
 
 from web_api_sl import models
