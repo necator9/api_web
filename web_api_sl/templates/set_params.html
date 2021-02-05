@@ -3,17 +3,66 @@
 
 {% block app_content %}
 
-<h1>Node parameters</h1>
-<p><a href="{{ url_for('routes.get', node_name=node_name) }}"><-Show parameters</a></p>
+
+<h1>Set node parameters</h1>
+<br>
+
+<p>
+<a href="{{ url_for('routes.get', node_name=node['name']) }}" class="btn btn-primary active" role="button"
+   aria-pressed="true">
+     <span class="glyphicon glyphicon-menu-left" aria-hidden="true"></span> Show parameters</a>
+</p>
+
 <p>
 <form method="post" action="/set/{{ node_name }}">
-    {% for alias, button in buttons.items() %}
-        <input type="submit" value="{{ button }}" name="{{ alias }}"/>
-    {% endfor %}
+    <div class="row justify-content-center">
+        {% for alias, button in buttons.items() %}
+            <div class="col-md-2">
+                <input type="submit" class="btn btn-primary" value="{{ button }}" name="{{ alias }}"/>
+            </div>
+        {% endfor %}
+    </div>
 </form>
 </p>
-<div class="row">
-    <div class="col-md-4">{{ wtf.quick_form(node_form) }}</div>
-</div>
 
+<p>
+<form action="" method="post" novalidate>
+    {{ node_form.hidden_tag() }}
+    <div class="row">
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.latitude, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.longitude, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.bright_lvl, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.dimm_lvl, class='form-control') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.lamp_shutdown_interval, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.max_neighbour_distance, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.min_obj_speed, class='form-control') }}
+        </div>
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.max_obj_speed, class='form-control') }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(node_form.submit, class='btn btn-primary') }}
+        </div>
+    </div>
+</form>
+</p>
 {% endblock %}
