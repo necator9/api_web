@@ -1,7 +1,127 @@
 {% extends "base.html" %}
-{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block head %}
+{{ super() }}
+<script src='https://api.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.js'></script>
+<link href='https://api.mapbox.com/mapbox-gl-js/v0.46.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock %}
+
 
 {% block app_content %}
-<h1>Main</h1>
+<div class="headcontainer">
+    <h1>Topology</h1>
+</div>
+<div class="container">
+    <h2>{{ n_nodes }} nodes registered</h2>
+</div>
+<div class="container">
+    <input class="inputBox" type="number" id="Longitude" placeholder="Enter Longitude" />
+    <input class="inputBox" type="number" id="Latitude" placeholder="Enter Latitude" />
+    <button class="button" onclick="getLonLat()"> Submit</button>
+</div>
+<div class="container">
+    <div id='map' style='width: 95%; height:500px;'></div><br/><br/>
+</div>
+
+	<script>
+		var longitude, latitude;
+
+		function getLonLat(){
+			longitude = document.getElementById("Longitude").value;
+			latitude = document.getElementById("Latitude").value;
+			display_map(longitude, latitude);
+		}
+
+        function setMarker(coords) {
+            var marker = new mapboxgl.Marker()
+            .setLngLat([coords['long'], coords['lat']])
+            .addTo(map);
+        }
+		function display_map(longitude=77.3852, latitude=28.5066, coords) {
+			mapboxgl.accessToken = "{{ mapbox_access_token }}"
+            map = new mapboxgl.Map({
+			container: 'map',
+			style: 'mapbox://styles/mapbox/streets-v10',
+			center: [longitude,latitude],
+			zoom: 16,
+			bearing: -17.6,
+			pitch:15
+
+			});
+			// fulscreen button
+			map.addControl(new mapboxgl.FullscreenControl());
+			// display a blue marker
+            {#myFunction(longitude,latitude)#}
+
+            var markers = {{ markers |safe }}
+            markers.forEach(function(marker) {
+                new mapboxgl.Marker()
+                    .setLngLat(marker.geometry.coordinates)
+                    .addTo(map);
+            });
+
+            {#var test = {{ test | safe }}#}
+            {#console.log(test)#}
+            var coordinates = {{ line | safe }}.geometry.coordinates;
+            var bounds = coordinates.reduce(function (bounds, coord) {
+            return bounds.extend(coord);
+              }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+
+            map.fitBounds(bounds, {
+            padding: 60
+             });
+
+	  		// Navigation marker at top-left corner
+	  		var nav = new mapboxgl.NavigationControl();
+	  			map.addControl(nav, 'top-left');
+	  		// change false to true, to get your location. Then, enable location in the browser.
+	  		map.addControl(new mapboxgl.GeolocateControl({
+	    			positionOptions: {
+	        			enableHighAccuracy: false
+	    			},
+	    		trackUserLocation: false
+			}));
+	  		// The 'building' layer in the mapbox-streets vector source contains building-height
+			// data from OpenStreetMap.
+			map.on('load', function() {
+			    // Insert the layer beneath any symbol layer.
+			    var layers = map.getStyle().layers;
+			    var labelLayerId;
+			    for (var i = 0; i < layers.length; i++) {
+			        if (layers[i].type === 'symbol' && layers[i].layout['text-field']) {
+			            labelLayerId = layers[i].id;
+			            break;
+			        }
+			    }
+			    map.addLayer({
+			        'id': '3d-buildings',
+			        'source': 'composite',
+			        'source-layer': 'building',
+			        'filter': ['==', 'extrude', 'true'],
+			        'type': 'fill-extrusion',
+			        'minzoom': 15,
+			        'paint': {
+			            'fill-extrusion-color': '#aaa',
+			            // use an 'interpolate' expression to add a smooth transition effect to the
+			            // buildings as the user zooms in
+			            'fill-extrusion-height': [
+			                "interpolate", ["linear"], ["zoom"],
+			                15, 0,
+			                15.05, ["get", "height"]
+			            ],
+			            'fill-extrusion-base': [
+			                "interpolate", ["linear"], ["zoom"],
+			                15, 0,
+			                15.05, ["get", "min_height"]
+			            ],
+			            'fill-extrusion-opacity': .6
+			        }
+			    }, labelLayerId);
+			});
+		}
+
+		display_map(longitude={{ coordinates['long'] }}, latitude={{ coordinates['lat'] }}, coords={{ coords | safe }});
+
+	</script>
 
 {% endblock %}

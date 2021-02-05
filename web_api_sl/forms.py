@@ -44,7 +44,8 @@ class UpdateData(FlaskForm):
 
 
 class RemoveNode(FlaskForm):
-    name = StringField('Hostname', validators=[DataRequired()])
+    name = StringField('Enter hostnames separated by comma', validators=[DataRequired()],
+                       render_kw={'placeholder': '10.22.0.33, my_host_fqdn.com'})
     submit = SubmitField('Remove')
 
 

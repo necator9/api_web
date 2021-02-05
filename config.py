@@ -11,3 +11,4 @@ class DevConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAX_CONTENT_LENGTH = 1024*1024
     UPLOAD_EXTENSIONS = ['.txt']
+    MAPS_TOKEN = os.getenv('MAPS_TOKEN')

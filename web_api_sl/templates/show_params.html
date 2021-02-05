@@ -9,13 +9,13 @@
 <p>
 <form action="" method="post" novalidate>
     {{ update_form.hidden_tag() }}
-    {{ wtf.form_field(update_form.submit, class='btn btn-primary active') }}
+    {{ wtf.form_field(update_form.submit, class='button') }}
 </form>
 </p>
 
 {% if node %}
 <p>
-<a href="{{ url_for('routes.set', node_name=node['name']) }}" class="btn btn-primary active" role="button"
+<a href="{{ url_for('routes.set', node_name=node['name']) }}" class="button" role="button"
    aria-pressed="true">
     Set parameters <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></a>
 </p>

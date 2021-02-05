@@ -2,8 +2,26 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<h2>Upload hostnames</h2>
-<div class="row">
-    <div class="col-md-4">{{ wtf.quick_form(form) }}</div>
+<div class="headcontainer">
+    <h1>Upload hostnames</h1>
 </div>
+
+<div class="container">
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="row">
+        <div class="form-group col-md-6">
+            {{ wtf.form_field(form.file, class='filebutton') }}
+        </div>
+            </div>
+    <div class="row">
+        <div class="form-group col-md-3">
+            {{ wtf.form_field(form.submit, class='button') }}
+        </div>
+    </div>
+</form>
+</div>
+{#<div class="row">#}
+{#    <div class="col-md-4">{{ wtf.quick_form(form) }}</div>#}
+{#</div>#}
 {% endblock %}
