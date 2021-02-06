@@ -37,7 +37,7 @@
             .setLngLat([coords['long'], coords['lat']])
             .addTo(map);
         }
-		function display_map(longitude=77.3852, latitude=28.5066, coords) {
+		function display_map(longitude=77.3852, latitude=28.5066) {
 			mapboxgl.accessToken = "{{ mapbox_access_token }}"
             map = new mapboxgl.Map({
 			container: 'map',
@@ -53,23 +53,23 @@
 			// display a blue marker
             {#myFunction(longitude,latitude)#}
 
-            var markers = {{ markers |safe }}
-            markers.forEach(function(marker) {
-                new mapboxgl.Marker()
-                    .setLngLat(marker.geometry.coordinates)
-                    .addTo(map);
-            });
+            {% if markers %}
+                var markers = {{ markers |safe }}
+                markers.forEach(function(marker) {
+                    new mapboxgl.Marker()
+                        .setLngLat(marker.geometry.coordinates)
+                        .addTo(map);
+                });
+            {% endif %}
 
-            {#var test = {{ test | safe }}#}
-            {#console.log(test)#}
-            var coordinates = {{ line | safe }}.geometry.coordinates;
-            var bounds = coordinates.reduce(function (bounds, coord) {
-            return bounds.extend(coord);
-              }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            {% if line %}
+                var coordinates = {{ line | safe }}.geometry.coordinates;
+                var bounds = coordinates.reduce(function (bounds, coord) {
+                    return bounds.extend(coord);
+                  }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            map.fitBounds(bounds, {padding: 60});
+            {% endif %}
 
-            map.fitBounds(bounds, {
-            padding: 60
-             });
 
 	  		// Navigation marker at top-left corner
 	  		var nav = new mapboxgl.NavigationControl();
@@ -120,7 +120,7 @@
 			});
 		}
 
-		display_map(longitude={{ coordinates['long'] }}, latitude={{ coordinates['lat'] }}, coords={{ coords | safe }});
+		display_map(longitude={{ coordinates['long'] }}, latitude={{ coordinates['lat'] }});
 
 	</script>
 

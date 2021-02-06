@@ -124,31 +124,6 @@ def gen_data_for_map():
     line = Feature(geometry=LineString(coordinates))
 
     return markers, line
-# ROUTE = [
-#     {"lat": 64.0027441, "long": -22.7066262, "name": "Keflavik Airport", "is_stop_location": True},
-#     {"lat": 64.0317168, "long": -22.1092311, "name": "Hafnarfjordur", "is_stop_location": True},
-#     {"lat": 63.99879, "long": -21.18802, "name": "Hveragerdi", "is_stop_location": True},
-#     {"lat": 63.4194089, "long": -19.0184548, "name": "Vik", "is_stop_location": True}]
-
-coords_arr = [{"lat": 64.0027441, "long": -22.7066262},
-              {"lat": 64.0317168, "long": -22.1092311}]
-def create_stop_locations_details():
-    stop_locations = []
-    for location in ROUTE:
-        # Skip anything that is not a stop location
-        if not location["is_stop_location"]:
-            continue
-        # Create a geojson object for stop location
-        point = Point([location['long'], location['lat']])
-        properties = {
-            'title': location['name'],
-            'icon': 'campsite',
-            'marker-color': '#3bb2d0',
-            'marker-symbol': len(stop_locations) + 1
-        }
-        feature = Feature(geometry=point, properties = properties)
-        stop_locations.append(feature)
-    return stop_locations
 
 @bp.route('/', methods=['GET', 'POST'])
 @bp.route('/index', methods=['GET', 'POST'])
@@ -158,7 +133,7 @@ def index():
     rows = db.session.query(Node).count()
     markers, line = gen_data_for_map()
     return render_template('index.html', title='Index', mapbox_access_token=token, coordinates=coordinates,
-                           n_nodes=rows, coords=coords_arr, markers=markers, line=line, test=None)
+                           n_nodes=rows, markers=markers, line=line)
 
 
 @bp.route('/search', methods=['GET', 'POST'])

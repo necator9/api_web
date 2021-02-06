@@ -28,6 +28,7 @@
 </p>
 
 <p>
+<fieldset>
 <form action="" method="post" novalidate>
     {{ node_form.hidden_tag() }}
     <div class="row">
@@ -46,6 +47,7 @@
     </div>
 
     <div class="row">
+
         <div class="form-group col-md-3">
             {{ wtf.form_field(node_form.lamp_shutdown_interval, class='inputBox') }}
         </div>
@@ -66,5 +68,6 @@
         </div>
     </div>
 </form>
+</fieldset>
 </p>
 {% endblock %}
