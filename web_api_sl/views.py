@@ -5,6 +5,7 @@ from web_api_sl import db
 from datetime import datetime
 import os
 from geojson import Point, Feature, LineString
+from random import uniform
 
 bp = Blueprint('routes', __name__)
 
@@ -22,7 +23,7 @@ def send_api_request(key, value):
 
 def get_api_request(node_name):
     send_api_request(None, None)
-    return False, {'name': node_name, 'app_status': True, 'latitude': 51.816096, 'longitude': 11.720393,
+    return False, {'name': node_name, 'app_status': True, 'latitude': uniform(51.816096, 51.316096), 'longitude': 11.720393,
                    'lamp_shutdown_interval': 2, 'bright_lvl': 40, 'dimm_lvl': 3, 'max_obj_speed': 20,
                    'min_obj_speed': 2, 'max_neighbour_distance': 50}
 
@@ -69,6 +70,16 @@ def process_set_api_request(new_node, old_node):
     flash('Submitted keys: {}'.format(submitted_fields))
 
 
+@bp.route('/all', methods=['GET', 'POST'])
+def show_all():
+    # app.config['POSTS_PER_PAGE']
+    page = request.args.get('page', 1, type=int)
+    nodes = Node.query.order_by(Node.last_updated.desc()).paginate(page, current_app.config['RESULTS_PER_PAGE'], False)
+    next_url = url_for('routes.show_all', page=nodes.next_num) if nodes.has_next else None
+    prev_url = url_for('routes.show_all', page=nodes.prev_num) if nodes.has_prev else None
+    return render_template("all.html", title='Show all', nodes=nodes.items, next_url=next_url, prev_url=prev_url)
+
+
 @bp.route('/upload', methods=['GET', 'POST'])
 def upload():
     upload_form = UploadForm()
@@ -108,18 +119,7 @@ def remove():
 
 
 def gen_data_for_map():
-    coordinates = [[-77.0366048812866, 38.89873175227713],
-                   [-77.03364372253417, 38.89876515143842],
-                   [-77.03364372253417, 38.89549195896866],
-                   [-77.02982425689697, 38.89549195896866],
-                    [-77.02400922775269, 38.89387200688839],
-                    [-77.01519012451172, 38.891416957534204],
-                    [-77.01521158218382, 38.892068305429156],
-                    [-77.00813055038452, 38.892051604275686],
-                    [-77.00832366943358, 38.89143365883688],
-                    [-77.00818419456482, 38.89082405874451],
-                    [-77.00815200805664, 38.88989712255097]]
-
+    coordinates = [(node.longitude, node.latitude) for node in Node.query.all()]
     markers = [Feature(geometry=Point(pair)) for pair in coordinates]
     line = Feature(geometry=LineString(coordinates))
 
